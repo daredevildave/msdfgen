@@ -169,7 +169,7 @@ bool getKerning(double &output, FontHandle *font, int unicode1, int unicode2) {
         output = 0;
         return false;
     }
-    output = kerning.x/64.;
+    output = unitScale * kerning.x/64.;
     return true;
 }
 
