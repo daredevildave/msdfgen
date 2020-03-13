@@ -7,6 +7,10 @@ namespace msdfgen {
 struct FloatRGB {
     float r, g, b;
 };
+/// A floating-point RGBA pixel.
+struct FloatRGBA {
+    float r, g, b, a;
+};
 
 /// A 2D image bitmap.
 template <typename T>

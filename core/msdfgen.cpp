@@ -227,6 +227,22 @@ void generatePseudoSDF(Bitmap<float> &output, const Shape &shape, double range, 
     }
 }
 
+void mergeMSDF4(Bitmap<FloatRGBA> &output, Bitmap<FloatRGB> &inmsdf, Bitmap<float> &insdf)
+{
+    int w = output.width(), h = output.height();
+
+    for (int y = 0; y < h; ++y) 
+    {            
+        for (int x = 0; x < w; ++x) 
+        {
+                output(x, y).r = inmsdf(x, y).r;
+                output(x, y).g = inmsdf(x, y).g;
+                output(x, y).b = inmsdf(x, y).b;
+                output(x, y).a = insdf(x, y);
+        }
+    }    
+}
+
 void generateMSDF(Bitmap<FloatRGB> &output, const Shape &shape, double range, const Vector2 &scale, const Vector2 &translate, double edgeThreshold) {
     int contourCount = shape.contours.size();
     int w = output.width(), h = output.height();

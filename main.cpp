@@ -136,6 +136,16 @@ static void parseColoring(Shape &shape, const char *edgeAssignment) {
     }
 }
 
+static void invertColor(Bitmap<FloatRGBA> &bitmap) {
+    for (int y = 0; y < bitmap.height(); ++y)
+        for (int x = 0; x < bitmap.width(); ++x) {
+            bitmap(x, y).r = 1.f-bitmap(x, y).r;
+            bitmap(x, y).g = 1.f-bitmap(x, y).g;
+            bitmap(x, y).b = 1.f-bitmap(x, y).b;
+            bitmap(x, y).a = 1.f-bitmap(x, y).a;
+        }
+}
+
 static void invertColor(Bitmap<FloatRGB> &bitmap) {
     for (int y = 0; y < bitmap.height(); ++y)
         for (int x = 0; x < bitmap.width(); ++x) {
@@ -355,8 +365,9 @@ int main(int argc, const char * const *argv) {
         SINGLE,
         PSEUDO,
         MULTI,
+        MULTI4,
         METRICS
-    } mode = MULTI;
+    } mode = MULTI4; //temp
     unsigned int legacyMode = 0;
     Format format = AUTO;
     const char *input = NULL;
@@ -405,6 +416,7 @@ int main(int argc, const char * const *argv) {
         ARG_MODE("sdf", SINGLE)
         ARG_MODE("psdf", PSEUDO)
         ARG_MODE("msdf", MULTI)
+        ARG_MODE("msdf4", MULTI4)
         ARG_MODE("metrics", METRICS)
 
         ARG_CASE("-svg", 1) {
@@ -765,6 +777,7 @@ int main(int argc, const char * const *argv) {
     // Compute output
     Bitmap<float> sdf;
     Bitmap<FloatRGB> msdf;
+    Bitmap<FloatRGBA> msdf4;
     switch (mode) {
         case SINGLE: {
             sdf = Bitmap<float>(width, height);
@@ -813,6 +826,38 @@ int main(int argc, const char * const *argv) {
             }
             break;
         }
+        case MULTI4: {
+            sdf = Bitmap<float>(width, height);
+            switch( legacyMode ) {
+                case 2:
+                    generateSDF_v2(sdf, shape, range, scale, translate);
+                    break;
+                case 1:
+                    generateSDF_v1(sdf, shape, range, scale, translate);
+                    break;
+                default:
+                    generateSDF(sdf, shape, range, scale, translate);
+            }
+            if (!skipColoring)
+                edgeColoringSimple(shape, angleThreshold, coloringSeed);
+            if (edgeAssignment)
+                parseColoring(shape, edgeAssignment);
+            msdf = Bitmap<FloatRGB>(width, height);
+            switch( legacyMode ) {
+                case 2:
+                    generateMSDF_v2(msdf, shape, range, scale, translate, edgeThreshold);
+                    break;
+                case 1:
+                    generateMSDF_v1(msdf, shape, range, scale, translate, edgeThreshold);
+                    break;
+                default:
+                    generateMSDF(msdf, shape, range, scale, translate, edgeThreshold);
+                    break;
+            }
+            msdf4 = Bitmap<FloatRGBA>(width, height);
+            mergeMSDF4(msdf4,msdf,sdf);
+            break;
+        }
         default:
             break;
     }
@@ -834,6 +879,7 @@ int main(int argc, const char * const *argv) {
     if (orientation == REVERSE) {
         invertColor(sdf);
         invertColor(msdf);
+        invertColor(msdf4);
     }
 
     // Save output
@@ -886,6 +932,26 @@ int main(int argc, const char * const *argv) {
                     ABORT("Failed to write test render file.");
             }
             break;
+        case MULTI4:
+            //error = writeOutput(msdf, output, format);
+            error = writeOutput(msdf4, output, format);
+            if (error)
+                ABORT(error);
+            /*if (testRenderMulti || testRender)
+                simulate8bit(msdf);
+            if (testRenderMulti) {
+                Bitmap<FloatRGB> render(testWidthM, testHeightM);
+                renderSDF(render, msdf, avgScale*range);
+                if (!savePng(render, testRenderMulti))
+                    puts("Failed to write test render file.");
+            }
+            if (testRender) {
+                Bitmap<float> render(testWidth, testHeight);
+                renderSDF(render, msdf, avgScale*range);
+                if (!savePng(render, testRender))
+                    ABORT("Failed to write test render file.");
+            }*/
+            break;            
         default:
             break;
     }

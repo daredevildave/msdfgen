@@ -106,4 +106,28 @@ bool saveBmp(const Bitmap<FloatRGB> &bitmap, const char *filename) {
     return !fclose(file);
 }
 
+bool saveBmp(const Bitmap<FloatRGBA> &bitmap, const char *filename) {
+    FILE *file = fopen(filename, "wb");
+    if (!file)
+        return false;
+
+    int paddedWidth;
+    writeBmpHeader(file, bitmap.width(), bitmap.height(), paddedWidth);
+
+    const uint8_t padding[4] = { };
+    for (int y = 0; y < bitmap.height(); ++y) {
+        for (int x = 0; x < bitmap.width(); ++x) {
+            uint8_t bgr[3] = {
+                (uint8_t) clamp(int(bitmap(x, y).b*0x100), 0xff),
+                (uint8_t) clamp(int(bitmap(x, y).g*0x100), 0xff),
+                (uint8_t) clamp(int(bitmap(x, y).r*0x100), 0xff)
+            };
+            fwrite(bgr, sizeof(uint8_t), 3, file);
+        }
+        fwrite(padding, 1, paddedWidth-3*bitmap.width(), file);
+    }
+
+    return !fclose(file);
+}
+
 }

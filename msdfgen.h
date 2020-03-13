@@ -34,6 +34,9 @@ void generateSDF(Bitmap<float> &output, const Shape &shape, double range, const 
 /// Generates a single-channel signed pseudo-distance field.
 void generatePseudoSDF(Bitmap<float> &output, const Shape &shape, double range, const Vector2 &scale, const Vector2 &translate);
 
+/// Merges MSDF and SDF into a 4 channel MSDF4.
+void mergeMSDF4(Bitmap<FloatRGBA> &output, Bitmap<FloatRGB> &inmsdf, Bitmap<float> &insdf);
+
 /// Generates a multi-channel signed distance field. Edge colors must be assigned first! (see edgeColoringSimple)
 void generateMSDF(Bitmap<FloatRGB> &output, const Shape &shape, double range, const Vector2 &scale, const Vector2 &translate, double edgeThreshold = 1.00000001);
 
