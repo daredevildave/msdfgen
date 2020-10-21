@@ -1,5 +1,4 @@
-Debug/
-Release/
+build/
 *.exe
 *.user
 *.sdf

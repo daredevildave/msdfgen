@@ -657,6 +657,9 @@ int main(int argc, const char * const *argv) {
                 deinitializeFreetype(ft);
                 ABORT("Failed to load font file.");
             }
+            if (!glyphExists(font, unicode)) {
+                ABORT("Glyph does not exist");
+            }
             if (!loadGlyph(shape, font, unicode, &glyphAdvance)) {
                 destroyFont(font);
                 deinitializeFreetype(ft);
