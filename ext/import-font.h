@@ -23,6 +23,8 @@ void destroyFont(FontHandle *font);
 bool getFontScale(double &output, FontHandle *font);
 /// Returns the width of space and tab
 bool getFontWhitespaceWidth(double &spaceAdvance, double &tabAdvance, FontHandle *font);
+/// Retutns true if the glyph exists
+bool glyphExists(FontHandle *font, int unicode);
 /// Loads the shape prototype of a glyph from font file
 bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance = NULL);
 /// Loads the shape prototype of a glyph directly from FT glyph slot

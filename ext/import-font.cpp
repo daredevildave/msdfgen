@@ -29,6 +29,7 @@ class FontHandle {
     friend void destroyFont(FontHandle *font);
     friend bool getFontScale(double &output, FontHandle *font);
     friend bool getFontWhitespaceWidth(double &spaceAdvance, double &tabAdvance, FontHandle *font);
+    friend bool glyphExists(FontHandle *font, int unicode);
     friend bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance);
     friend bool getKerning(double &output, FontHandle *font, int unicode1, int unicode2);
 
@@ -125,9 +126,14 @@ bool getFontWhitespaceWidth(double &spaceAdvance, double &tabAdvance, FontHandle
     return true;
 }
 
+bool glyphExists(FontHandle *font, int unicode) {
+    return FT_Get_Char_Index(font->face, unicode) != 0;
+}
+
 bool loadGlyph(Shape &output, FontHandle *font, int unicode, double *advance) {
     if (!font)
         return false;
+
     FT_Error error = FT_Load_Char(font->face, unicode, FT_LOAD_NO_SCALE);
     if (error)
         return false;
